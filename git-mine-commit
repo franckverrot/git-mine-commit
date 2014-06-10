@@ -1,0 +1,64 @@
+#!/bin/bash
+# git-mine-commit - A mining algorithm for git commits
+# Copyright (C) 2014 Franck Verrot <franck@verrot.fr>
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+mine() {
+  local prefix=$1
+  local max_iterations=$2
+  local progress_indicator="."
+  local commit_object=`git cat-file -p HEAD | head -n 2`
+  local tree=`echo "$commit_object" | head -n 1 | cut -c 6-46`
+  local head=`echo "$commit_object" | tail -n 1 | cut -c 8-48`
+
+  local msg=`git log -1 --pretty=%B`
+
+  echo -en "Mining HEAD's sha1..."
+  for i in $(seq 0 $max_iterations)
+  do
+    new_sha1=`echo -e "$msg\n\n[$i]" | git commit-tree $tree -p $head`
+
+
+    if [[ $new_sha1 == $prefix* ]]; then
+      echo -e "\t [OK] ($i iterations)"
+      `git update-ref refs/heads/master $new_sha1`
+      echo -e "\nSuccess: HEAD updated, mined SHA1 is now $new_sha1\n"
+      exit 0
+    else
+      let "val=$i % $max_iterations"
+      if [ $val -eq 0 ]; then
+        echo -n $progress_indicator
+      fi
+    fi
+  done
+  echo -e "\t[KO] (Reached max iterations of $max_iterations>)"
+  echo -e "\nHint: Did you try adjusting the max iterations by passing it as an argument ?\n"
+  exit 1
+}
+
+prefix=$1
+max_iterations=$2
+
+if [[ $prefix == "" ]]; then
+  echo "usage: `basename $0` <prefix> <max_iteration (default: 1M)"
+  echo -e "\te.g: git mine-commit 31337 100"
+  exit 1
+else
+  if [[ $max_iterations == "" ]]; then
+    max_iterations=1000000
+  fi
+
+  mine $prefix $max_iterations
+fi
