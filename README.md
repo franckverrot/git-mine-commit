@@ -1,5 +1,9 @@
 # git-mine-commit
 
+## RATIONALE
+
+This script allows oneself to forge a commit's SHA1 by brute-forcing its prefix. So if you want your commits to start with 0xdeadbeaf or 0x31337, this script is for you.
+
 ## SETUP
 
 Just place this script somewhere in your `PATH`.
