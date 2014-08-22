@@ -4,6 +4,15 @@
 
 This script allows oneself to forge a commit's SHA1 by brute-forcing its prefix. So if you want your commits to start with 0xdeadbeaf or 0x31337, this script is for you.
 
+## EXAMPLE
+
+    λ git log --oneline
+
+    cc9709a Update README.md
+    ccdd02d Add README.md
+    cc61887 Add LICENSE
+    cc0becc Inital commit
+
 ## SETUP
 
 Just place this script somewhere in your `PATH`.
