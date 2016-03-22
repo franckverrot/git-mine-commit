@@ -22,6 +22,7 @@ mine() {
   local commit_object=`git cat-file -p HEAD | head -n 2`
   local tree=`echo "$commit_object" | head -n 1 | cut -c 6-46`
   local head=`echo "$commit_object" | tail -n 1 | cut -c 8-48`
+  local branch=`git branch | sed -n -e 's/^\* \(.*\)/\1/p'`
 
   local msg=`git log -1 --pretty=%B`
 
@@ -33,7 +34,7 @@ mine() {
 
     if [[ $new_sha1 == $prefix* ]]; then
       echo -e "\t [OK] ($i iterations)"
-      `git update-ref refs/heads/master $new_sha1`
+      `git update-ref refs/heads/$branch $new_sha1`
       echo -e "\nSuccess: HEAD updated, mined SHA1 is now $new_sha1\n"
       exit 0
     else
